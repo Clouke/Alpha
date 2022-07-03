@@ -1,14 +1,16 @@
 package gg.clouke.alpha.util.chat;
 
-import lombok.experimental.UtilityClass;
-import org.bukkit.ChatColor;
+/**
+ * @author Clouke
+ * @since 01.06.2022 18:13
+ * © Alpha - All Rights Reserved
+ */
+public interface CC {
 
-@UtilityClass
-public final class CC {
+    String LINE = "&7&m---------------------------------";
 
-    public final String LINE = "&7&m---------------------------------";
-
-    public String translate(final String string) {
-        return ChatColor.translateAlternateColorCodes('&', string);
+    static String translate(String s) {
+        return s.replaceAll("&", "§");
     }
+
 }
