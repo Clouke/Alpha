@@ -4,8 +4,6 @@ import gg.clouke.alpha.util.annotations.DoNotMock;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * @author Clouke
@@ -17,7 +15,6 @@ import java.util.concurrent.Executors;
 public class EventBus implements EventProvider {
 
     private static final List<EventListener> listeners = new ArrayList<>();
-    private static final ExecutorService thread = Executors.newSingleThreadExecutor();
 
     @Override
     public EventProvider subscribe(EventListener listener) {
@@ -33,12 +30,12 @@ public class EventBus implements EventProvider {
 
     @Override
     public void publish(AlphaEvent event) {
-        thread.execute(() -> listeners.forEach(listener -> listener.onEvent(event)));
+        listeners.forEach(listener -> listener.onEvent(event));
     }
 
     @Override
     public <T extends AbstractEvent> void publish(Class<T> event) {
-        thread.execute(() -> listeners.forEach(listener -> listener.onEvent(event)));
+        listeners.forEach(listener -> listener.onEvent(event));
     }
 
 }
