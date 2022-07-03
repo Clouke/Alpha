@@ -1,6 +1,8 @@
 package gg.clouke.alpha.command.impl;
 
 import gg.clouke.alpha.provider.log.Log;
+import gg.clouke.alpha.util.atomic.FinalNumber;
+import gg.clouke.alpha.util.atomic.Reference;
 import gg.clouke.alpha.util.chat.CC;
 import gg.clouke.alpha.util.command.BaseCommand;
 import gg.clouke.alpha.util.command.Command;
@@ -11,8 +13,6 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -45,7 +45,7 @@ public class LogsCommand extends BaseCommand {
                 return;
             }
 
-            AtomicReference<StringBuilder> builder = new AtomicReference<>();
+            Reference<StringBuilder> builder = new Reference<>();
             if (logs.size() >= 15) {
                 builder.set(new StringBuilder());
                 logs.forEach(log -> builder.get().append(log.append())); // for paste
@@ -54,15 +54,15 @@ public class LogsCommand extends BaseCommand {
             player.sendMessage(CC.translate(CC.LINE));
             player.sendMessage(CC.translate("&e" + target.getName() + "'s Logs:"));
 
-            AtomicInteger i = new AtomicInteger();
-            logs.forEach(log -> {
-                if (i.getAndIncrement() >= 15) {
+            FinalNumber number = new FinalNumber();
+            for (Log log : logs) {
+                if (number.getAndIncrease() >= 15) {
                     player.sendMessage(CC.translate("&eUploaded logs to: &7https://pastie.io/" + plugin.getLogProvider().toPaste(builder.toString())));
-                    return;
+                    break;
                 }
 
                 player.sendMessage(CC.translate(log.string()));
-            });
+            }
 
             player.sendMessage(CC.translate(CC.LINE));
         });

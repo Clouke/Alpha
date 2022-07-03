@@ -62,7 +62,7 @@ public class Log {
     }
 
     public String string() {
-        return "[" + baseName + " " + baseType + "] &7" + data;
+        return "&e[" + baseName + " " + baseType + "] &7" + data;
     }
 
     public String append() {
