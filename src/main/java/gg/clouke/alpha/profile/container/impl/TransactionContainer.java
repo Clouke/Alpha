@@ -19,6 +19,7 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutTransaction;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.function.Function;
 
 /**
  * @author Clouke
@@ -30,6 +31,7 @@ import java.util.WeakHashMap;
 public final class TransactionContainer extends AbstractContainer implements PacketContainer, EventListener, Dispatcher<Executable> {
 
     private final Map<Short, List<Executable>> actions;
+    private final Function<Short, Short> delays;
     private short pps, interval, ticks;
     private long startTime;
 
@@ -38,6 +40,12 @@ public final class TransactionContainer extends AbstractContainer implements Pac
         super.plugin.getEventProvider().subscribe(this);
         super.profile.getTrackedListeners().add(this);
         this.actions = new WeakHashMap<>();
+        this.delays = tick -> {
+            if (tick == Short.MIN_VALUE) {
+                tick = 0;
+            }
+            return --tick;
+        };
     }
 
     @Override
@@ -62,7 +70,7 @@ public final class TransactionContainer extends AbstractContainer implements Pac
         Condition.of(ticking, () -> {
             writePacket();
             this.actions.put(ticks, Lists.newArrayList());
-            this.ticks = next();
+            this.ticks = delays.apply(ticks);
         });
     }
 
@@ -70,10 +78,10 @@ public final class TransactionContainer extends AbstractContainer implements Pac
     public void dispatch(Executable executable) {
         writePacket();
         this.actions.put(ticks, Lists.newArrayList(executable));
-        this.ticks = next();
+        this.ticks = delays.apply(ticks);
     }
 
-    void updatePackets() { // Keep track of packets per second
+    private void updatePackets() { // Keep track of packets per second
         final long delta = System.currentTimeMillis() - startTime;
         if (delta >= 1000) {
             pps = interval;
@@ -84,14 +92,7 @@ public final class TransactionContainer extends AbstractContainer implements Pac
         }
     }
 
-    void writePacket() {
+    private void writePacket() {
         this.plugin.getPacketProvider().writePacket(profile, new PacketPlayOutTransaction(0, ticks, false));
-    }
-
-    short next() {
-        short tick = ticks;
-        if (tick == Short.MIN_VALUE) tick = 0;
-        tick--;
-        return tick;
     }
 }
