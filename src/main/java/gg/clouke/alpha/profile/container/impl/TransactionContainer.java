@@ -40,12 +40,7 @@ public final class TransactionContainer extends AbstractContainer implements Pac
         super.plugin.getEventProvider().subscribe(this);
         super.profile.getTrackedListeners().add(this);
         this.actions = new WeakHashMap<>();
-        this.delays = tick -> {
-            if (tick == Short.MIN_VALUE) {
-                tick = 0;
-            }
-            return --tick;
-        };
+        this.delays = tick -> tick == Short.MIN_VALUE ? -1 : --tick;
     }
 
     @Override
